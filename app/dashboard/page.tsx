@@ -46,6 +46,70 @@ const actionButtons = [
   },
 ]
 
+function VideoCard({ video }: { video: any }) {
+  const prevVideoIdRef = React.useRef<string | undefined>(undefined)
+
+  // Initialize image source
+  const getInitialImgSrc = () =>
+    video.thumbnail || `https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`
+
+  const [imgSrc, setImgSrc] = React.useState(getInitialImgSrc())
+  const [hasError, setHasError] = React.useState(false)
+
+  // Only reset when video ID actually changes (not on every render)
+  React.useEffect(() => {
+    if (prevVideoIdRef.current !== video.videoId) {
+      prevVideoIdRef.current = video.videoId
+      setImgSrc(getInitialImgSrc())
+      setHasError(false)
+    }
+  }, [video.videoId])
+
+  const handleError = () => {
+    if (hasError) return
+
+    const currentSrc = imgSrc as string
+    const maxResSrc = `https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`
+
+    // If default thumbnail fails and it's not already the maxres one, try maxres
+    if (video.thumbnail && currentSrc === video.thumbnail && currentSrc !== maxResSrc) {
+      setImgSrc(maxResSrc)
+      return
+    }
+
+    // Downgrade quality if maxres or hq fails
+    if (currentSrc.includes("maxresdefault")) {
+      setImgSrc(`https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`)
+    } else if (currentSrc.includes("hqdefault")) {
+      setImgSrc(`https://i.ytimg.com/vi/${video.videoId}/mqdefault.jpg`)
+    } else {
+      setHasError(true)
+    }
+  }
+
+  return (
+    <Link
+      href={`/learn?v=${encodeURIComponent(video.videoId)}`}
+      className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 rounded-xl h-full"
+    >
+      <Card className="overflow-hidden cursor-pointer transition-colors hover:bg-muted/50 pt-0 h-full flex flex-col">
+        <div className="relative w-full h-32 bg-muted">
+          <img
+            src={imgSrc}
+            alt={video.title}
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover"
+            onError={handleError}
+          />
+        </div>
+        <CardContent className="p-4">
+          <p className="text-sm font-medium line-clamp-2">{video.title}</p>
+        </CardContent>
+      </Card>
+    </Link>
+  )
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const [linkDialogOpen, setLinkDialogOpen] = React.useState(false)
@@ -106,7 +170,7 @@ export default function DashboardPage() {
     }
   }
 
-  const handleCapsuleClick = (capsule: (typeof recentCapsules)[number]) => {
+  const handleCapsuleClick = (capsule: NonNullable<typeof recentCapsules>[number]) => {
     if (capsule.status !== "completed" && capsule.status !== "failed") {
       toast.message("Capsule is still being generated", {
         description: "Please wait a bit and try again.",
@@ -284,25 +348,7 @@ export default function DashboardPage() {
 
             {/* Recent Videos */}
             {recentVideos?.map((video) => (
-              <Link
-                key={String(video._id)}
-                href={`/learn?v=${encodeURIComponent(video.videoId)}`}
-                className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 rounded-xl h-full"
-              >
-                <Card className="overflow-hidden cursor-pointer transition-colors hover:bg-muted/50 pt-0 h-full flex flex-col">
-                  <div className="relative w-full h-32 bg-muted">
-                    <img
-                      src={video.thumbnail || `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`}
-                      alt={video.title}
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <p className="text-sm font-medium line-clamp-2">{video.title}</p>
-                  </CardContent>
-                </Card>
-              </Link>
+              <VideoCard key={String(video._id)} video={video} />
             ))}
 
             {/* Empty state */}

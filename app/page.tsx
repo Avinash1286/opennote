@@ -3,6 +3,13 @@
 import * as React from "react"
 import Link from "next/link"
 import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs"
+import {
   Play,
   Sparkles,
   BookOpen,
@@ -174,15 +181,25 @@ export default function LandingPage() {
             </Link>
           </nav>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/dashboard">Log in</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/dashboard">
-                Get Started
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <Button variant="ghost" size="sm">
+                  Log in
+                </Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button size="sm">
+                  Get Started
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </SignUpButton>
+            </SignedOut>
+            <SignedIn>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
           </div>
         </div>
       </header>
@@ -372,8 +389,6 @@ export default function LandingPage() {
                 features={[
                   "Real-time multiplayer quiz battles",
                   "AI generates questions on-the-fly",
-                  "Speed-based scoring system",
-                  "Ranked matches with ELO ratings",
                   "Daily challenges & leaderboards",
                   "Challenge friends or find random matches",
                 ]}
@@ -505,7 +520,7 @@ export default function LandingPage() {
                     <h3 className="font-semibold">Class Performance Overview</h3>
                     <Badge variant="secondary">Live</Badge>
                   </div>
-                  
+
                   {/* Mock chart */}
                   <div className="mb-6 h-40 rounded-lg bg-gradient-to-t from-emerald-500/10 to-transparent border border-border/30 flex items-end justify-around p-4">
                     {[65, 78, 45, 89, 72, 56, 83].map((height, i) => (
@@ -582,7 +597,7 @@ export default function LandingPage() {
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-purple-500 to-pink-500 px-8 py-16 text-center sm:px-16 sm:py-24">
               {/* Background pattern */}
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYtMmgtNHY2aDR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
-              
+
               <div className="relative">
                 <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl md:text-5xl">
                   Ready to Transform Your Learning?

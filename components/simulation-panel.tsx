@@ -19,6 +19,7 @@ import {
   Maximize2,
   Minimize2,
   X,
+  RefreshCw,
 } from "lucide-react"
 
 interface SimulationIdea {
@@ -181,7 +182,7 @@ export function SimulationPanel() {
           <p className="text-sm text-muted-foreground mb-4">
             {ideasStatus?.error || "This video doesn't contain concepts that would benefit from interactive simulations."}
           </p>
-          <Button variant="outline" onClick={handleRegenerateIdeas} disabled={!transcript}>
+          <Button variant="outline" onClick={handleGenerateIdeas} disabled={!transcript}>
             <RefreshCw className="size-4 mr-2" />
             Try Again
           </Button>
@@ -200,7 +201,7 @@ export function SimulationPanel() {
           <p className="text-sm text-muted-foreground mb-4">
             {ideasStatus?.error || "An error occurred while analyzing the video."}
           </p>
-          <Button onClick={handleRegenerateIdeas} disabled={!transcript}>
+          <Button onClick={handleGenerateIdeas} disabled={!transcript}>
             <RefreshCw className="size-4 mr-2" />
             Try Again
           </Button>

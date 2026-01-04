@@ -524,6 +524,12 @@ function LessonView({
   const handleQuestionAnswer = (questionIndex: number, isCorrect: boolean) => {
     if (isCorrect) {
       playCorrectSound()
+      // Trigger celebration only on correct answers
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+      })
     } else {
       playIncorrectSound()
     }
@@ -541,13 +547,6 @@ function LessonView({
       let correctCount = isCorrect ? 1 : 0
       questionStates.forEach(state => {
         if (state.correct) correctCount++
-      })
-
-      // Trigger celebration
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
       })
 
       onComplete(correctCount, totalQuestions)
@@ -945,7 +944,7 @@ function QuestionRenderer({ question, questionIndex, onAnswer, isAnswered }: Que
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Question {questionIndex + 1}</CardTitle>
-        <CardDescription>Unknown question type: {question.type}</CardDescription>
+        <CardDescription>Unknown question type: {(question as any).type}</CardDescription>
       </CardHeader>
     </Card>
   )
@@ -1178,7 +1177,7 @@ function FillBlanksQuestionCard({ question, index, onAnswer, isAnswered }: FillB
               )}
             />
             {showResult && isCorrect === false && correctAnswerDisplay && (
-              <span className="text-xs text-green-600">({correctAnswerDisplay})</span>
+              <span className="text-sm font-semibold text-green-600">({correctAnswerDisplay})</span>
             )}
           </span>
         )
@@ -1205,7 +1204,11 @@ function FillBlanksQuestionCard({ question, index, onAnswer, isAnswered }: FillB
         )}
 
         {!showResult && blanks.length > 0 && (
-          <Button onClick={handleSubmit} className="mt-4">
+          <Button
+            onClick={handleSubmit}
+            className="mt-4"
+            disabled={answers.size === 0}
+          >
             Check Answer
           </Button>
         )}
@@ -1213,12 +1216,12 @@ function FillBlanksQuestionCard({ question, index, onAnswer, isAnswered }: FillB
         {showResult && (
           <div className={cn(
             "mt-4 rounded-lg border p-3",
-            Array.from(results.values()).every(v => v)
+            results.size > 0 && Array.from(results.values()).every(v => v)
               ? "border-green-500 bg-green-500/10"
               : "border-red-500 bg-red-500/10"
           )}>
             <p className="text-sm font-medium">
-              {Array.from(results.values()).every(v => v)
+              {results.size > 0 && Array.from(results.values()).every(v => v)
                 ? "✓ All correct!"
                 : "Some answers are incorrect. The correct answers are shown above."}
             </p>
@@ -1387,7 +1390,7 @@ function DragDropQuestionCard({ question, index, onAnswer, isAnswered }: DragDro
   const isTargetCorrect = (targetId: string) => {
     const placedItemId = placements.get(targetId)
     const target = targets.find(t => t.id === targetId)
-    return placedItemId && target?.acceptsItems.includes(placedItemId)
+    return !!(placedItemId && target?.acceptsItems?.includes(placedItemId))
   }
 
   const activeItem = items.find(item => item.id === activeId)
@@ -1470,7 +1473,11 @@ function DragDropQuestionCard({ question, index, onAnswer, isAnswered }: DragDro
         </DndContext>
 
         {!showResult && (
-          <Button onClick={handleSubmit} className="mt-4">
+          <Button
+            onClick={handleSubmit}
+            className="mt-4"
+            disabled={placements.size === 0}
+          >
             Check Answer
           </Button>
         )}

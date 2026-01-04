@@ -3,7 +3,8 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Youtube, Pill, ChevronUp, LayoutDashboard } from "lucide-react"
+import { Youtube, Pill, LayoutDashboard } from "lucide-react"
+import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs"
 
 import {
   Sidebar,
@@ -17,13 +18,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const mainItems = [
   {
@@ -45,6 +39,7 @@ const mainItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { user } = useUser()
 
   return (
     <Sidebar className="border-r border-sidebar-border">
@@ -80,24 +75,28 @@ export function AppSidebar() {
         <div className="rounded-lg border border-sidebar-border bg-sidebar-accent/50 p-2 text-center text-xs text-muted-foreground">
           Free Plan
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <SignedIn>
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <UserButton 
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "h-8 w-8"
+                }
+              }}
+            />
+            <span className="flex-1 truncate text-sm">
+              {user?.firstName || user?.emailAddresses[0]?.emailAddress || "User"}
+            </span>
+          </div>
+        </SignedIn>
+        <SignedOut>
+          <SignInButton mode="modal">
             <Button variant="ghost" className="w-full justify-start gap-2 px-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                  U
-                </AvatarFallback>
-              </Avatar>
-              <span className="flex-1 truncate text-left text-sm">User</span>
-              <ChevronUp className="size-4 text-muted-foreground" />
+              Sign in
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-[200px]">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Sign out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </SignInButton>
+        </SignedOut>
       </SidebarFooter>
     </Sidebar>
   )
