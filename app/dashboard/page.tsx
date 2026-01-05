@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { extractYouTubeId } from "@/components/youtube-player"
+import { CapsuleCard } from "@/components/capsule-card"
 
 const actionButtons = [
   {
@@ -49,14 +50,15 @@ const actionButtons = [
 function VideoCard({ video }: { video: any }) {
   const prevVideoIdRef = React.useRef<string | undefined>(undefined)
 
-  // Initialize image source
-  const getInitialImgSrc = () =>
-    video.thumbnail || `https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`
+  const getInitialImgSrc = () => {
+    if (!video.videoId) return ""
+    return video.thumbnail || `https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`
+  }
 
   const [imgSrc, setImgSrc] = React.useState(getInitialImgSrc())
   const [hasError, setHasError] = React.useState(false)
 
-  // Only reset when video ID actually changes (not on every render)
+  // Only reset when video ID actually changes
   React.useEffect(() => {
     if (prevVideoIdRef.current !== video.videoId) {
       prevVideoIdRef.current = video.videoId
@@ -69,6 +71,10 @@ function VideoCard({ video }: { video: any }) {
     if (hasError) return
 
     const currentSrc = imgSrc as string
+    if (!video.videoId) {
+      setHasError(true)
+      return
+    }
     const maxResSrc = `https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`
 
     // If default thumbnail fails and it's not already the maxres one, try maxres
@@ -89,21 +95,28 @@ function VideoCard({ video }: { video: any }) {
 
   return (
     <Link
-      href={`/learn?v=${encodeURIComponent(video.videoId)}`}
+      href={`/learn?v=${encodeURIComponent(video.videoId || "")}`}
       className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 rounded-xl h-full"
     >
       <Card className="overflow-hidden cursor-pointer transition-colors hover:bg-muted/50 pt-0 h-full flex flex-col">
-        <div className="relative w-full h-32 bg-muted">
-          <img
-            src={imgSrc}
-            alt={video.title}
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover"
-            onError={handleError}
-          />
+        <div className="relative w-full h-32 bg-muted flex items-center justify-center">
+          {!hasError && imgSrc ? (
+            <img
+              src={imgSrc}
+              alt={video.title}
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover"
+              onError={handleError}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center text-muted-foreground p-2 text-center">
+              <div className="i-lucide-video mb-1 h-6 w-6 opacity-50" />
+              <span className="text-xs">Preview unavailable</span>
+            </div>
+          )}
         </div>
         <CardContent className="p-4">
-          <p className="text-sm font-medium line-clamp-2">{video.title}</p>
+          <p className="text-sm font-medium line-clamp-2">{video.title || "Untitled Video"}</p>
         </CardContent>
       </Card>
     </Link>
@@ -292,58 +305,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {/* Recent Capsules */}
             {recentCapsules?.map((capsule) => (
-              <button
-                key={String(capsule._id)}
-                type="button"
-                onClick={() => handleCapsuleClick(capsule)}
-                className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 rounded-xl h-full"
-              >
-                <Card className="overflow-hidden cursor-pointer transition-colors hover:bg-muted/50 h-full flex flex-col pt-0">
-                  {/* Thumbnail area - mimicking video card style */}
-                  <div className="relative w-full h-32 shrink-0 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                    <BookOpen className="size-10 text-primary/40" />
-                  </div>
-
-                  <CardContent className="p-4 flex flex-col flex-1">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium line-clamp-2">{capsule.title}</p>
-                      {capsule.description && (
-                        <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
-                          {capsule.description}
-                        </p>
-                      )}
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        {capsule.moduleCount} modules • {capsule.lessonCount} lessons
-                      </p>
-
-                      {capsule.status !== "completed" && capsule.status !== "failed" && (
-                        <div className="mt-3 space-y-1">
-                          <p className="text-xs text-muted-foreground">
-                            {capsule.status === "generating_outline"
-                              ? "Creating course outline..."
-                              : `Generating content... Module ${(capsule.generation?.modulesGenerated ?? 0) + 1} of ${capsule.generation?.totalModules || "?"}`}
-                          </p>
-                          <Progress
-                            value={
-                              capsule.status === "generating_outline"
-                                ? 10
-                                : Math.round(
-                                  ((capsule.generation?.modulesGenerated ?? 0) /
-                                    Math.max(capsule.generation?.totalModules ?? 1, 1)) *
-                                  100
-                                )
-                            }
-                          />
-                        </div>
-                      )}
-
-                      {capsule.status === "failed" && (
-                        <p className="mt-2 text-xs text-destructive">Generation failed</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </button>
+              <CapsuleCard key={String(capsule._id)} capsule={capsule} />
             ))}
 
             {/* Recent Videos */}

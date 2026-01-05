@@ -15,7 +15,7 @@ export const listCapsules = query({
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 50;
-    
+
     let capsules;
     if (args.status) {
       capsules = await ctx.db
@@ -30,7 +30,29 @@ export const listCapsules = query({
         .take(limit);
     }
 
-    return capsules;
+    return await Promise.all(
+      capsules.map(async (c) => {
+        const jobs = await ctx.db
+          .query("capsuleGenerationJobs")
+          .withIndex("by_capsuleId", (q) => q.eq("capsuleId", c._id))
+          .order("desc")
+          .take(1);
+
+        const job = jobs[0] ?? null;
+
+        return {
+          ...c,
+          generation: job
+            ? {
+              currentStage: job.currentStage,
+              modulesGenerated: job.modulesGenerated,
+              totalModules: job.totalModules,
+              updatedAt: job.updatedAt,
+            }
+            : null,
+        };
+      })
+    );
   },
 });
 
@@ -135,11 +157,11 @@ export const getRecentCapsules = query({
           createdAt: c.createdAt,
           generation: job
             ? {
-                currentStage: job.currentStage,
-                modulesGenerated: job.modulesGenerated,
-                totalModules: job.totalModules,
-                updatedAt: job.updatedAt,
-              }
+              currentStage: job.currentStage,
+              modulesGenerated: job.modulesGenerated,
+              totalModules: job.totalModules,
+              updatedAt: job.updatedAt,
+            }
             : null,
         };
       })

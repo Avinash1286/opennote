@@ -1,0 +1,23 @@
+{
+    "manifest_version": 3,
+    "name": "OpenNote Learn for YouTube",
+    "version": "1.0",
+    "description": "Injects a Learn button on YouTube videos to open OpenNote.",
+    "permissions": [
+        "activeTab"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.youtube.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "styles.css"
+            ],
+            "run_at": "document_idle"
+        }
+    ]
+}

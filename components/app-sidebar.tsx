@@ -33,7 +33,7 @@ const mainItems = [
   {
     title: "Capsule",
     icon: Pill,
-    href: "/capsule",
+    href: "/dashboard/capsule",
   },
 ]
 

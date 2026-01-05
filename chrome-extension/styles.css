@@ -1,0 +1,77 @@
+/* Main Container for the buttons */
+.opennote-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2147483647;
+  /* Max z-index to be on top of everything */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Roboto', sans-serif;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Learn Button */
+.opennote-learn-btn {
+  background-color: #fca5a5;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.opennote-learn-btn:hover {
+  transform: scale(1.05);
+  background-color: #f87171;
+}
+
+.opennote-learn-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Close Button */
+.opennote-close-btn {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s;
+}
+
+.opennote-close-btn:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.opennote-close-btn svg {
+  width: 16px;
+  height: 16px;
+}
